@@ -14,7 +14,7 @@ So this VM needed a static IP address, and I'm not into that, so I cheated a lit
 
 `UPDATE wp_options SET option_value='http://192.168.1.44' WHERE option_id =1;`
 
-I know this is quite a bit of extra work, but I do like to optimise things, and it keeps me active on both the Blue and Red side of networking/system administration. This is something my very good firend MrB3n [has](http://www.mrb3n.com/?cat=8) blooged about
+I know this is quite a bit of extra work, but I do like to optimise things, and it keeps me active on both the Blue and Red side of networking/system administration. This is something my very good firend MrB3n [has](http://www.mrb3n.com/?cat=8) blogged about
 
 Once that was done, I went off to see what I could find...
 
